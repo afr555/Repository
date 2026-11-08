@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عالمي | WORLD</title>
+    
+    <!-- PWA & Theme Meta Tags -->
+    <meta name="theme-color" content="#8B5CF6">
+    <meta name="description" content="عالمك كله في مكان واحد - تطبيق شامل للتنظيم الدراسي واليوميات والتغذية والتتبع.">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <!-- Google Fonts: Cairo & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            lavender: '#8B5CF6',
+                            lavenderLight: '#A78BFA',
+                            pink: '#EC4899',
+                            pinkLight: '#F472B6',
+                            mauveDark: '#4C1D95',
+                            bgLight: '#F8F5FF',
+                            bgDark: '#0F172A',
+                            cardDark: '#1E293B'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Cairo', 'Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Lucide Icons Library -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: 'Cairo', 'Inter', sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .dark .glass-panel {
+            background: rgba(30, 41, 59, 0.75);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        @keyframes splashPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.9; }
+        }
+        .splash-anim {
+            animation: splashPulse 2.5s infinite ease-in-out;
+        }
+        .badge-glow {
+            box-shadow: 0 0 15px rgba(236, 72, 153, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-brand-bgLight dark:bg-brand-bgDark text-slate-800 dark:text-slate-100 min-h-full transition-colors duration-300 custom-scrollbar flex flex-col">
+
+    <!-- 1. AUTH & LOGIN SCREEN -->
+    <div id="authScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-brand-mauveDark via-brand-lavender to-brand-pink p-4">
+        <div class="bg-white dark:bg-brand-cardDark w-full max-w-md rounded-3xl p-8 shadow-2xl space-y-6 border border-white/20 splash-anim">
+            <div class="text-center space-y-2">
+                <div class="w-20 h-20 mx-auto bg-gradient-to-tr from-brand-lavender to-brand-pink rounded-3xl flex items-center justify-center text-white shadow-xl">
+                    <i data-lucide="globe" class="w-10 h-10"></i>
+                </div>
+                <h1 class="text-3xl font-black bg-gradient-to-r from-brand-lavender to-brand-pink bg-clip-text text-transparent">عالمي | WORLD</h1>
+                <p class="text-xs text-slate-400" id="authSubTitle">عالمك كله في مكان واحد - قم بدخول حسابك</p>
+            </div>
+
+            <!-- Tabs Switcher -->
+            <div class="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl">
+                <button type="button" onclick="switchAuthMode('login')" id="loginTabBtn" class="flex-1 py-2.5 text-xs font-bold rounded-xl transition-all bg-white dark:bg-slate-700 shadow-sm">تسجيل الدخول</button>
+                <button type="button" onclick="switchAuthMode('register')" id="regTabBtn" class="flex-1 py-2.5 text-xs font-bold rounded-xl transition-all text-slate-500">إنشاء حساب جديد</button>
+            </div>
+
+            <!-- Form -->
+            <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                <div id="nameFieldContainer" class="hidden space-y-1">
+                    <label class="text-xs font-bold text-slate-500">الاسم الشخصي</label>
+                    <input type="text" id="authName" placeholder="أدخل اسمك الكريم" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-lavender">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-slate-500">اسم المستخدم أو البريد</label>
+                    <input type="text" id="authEmail" required placeholder="مثال: user@world.com" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-lavender">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-slate-500">كلمة المرور</label>
+                    <input type="password" id="authPass" required placeholder="••••••••" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-lavender">
+                </div>
+                <button type="submit" id="authSubmitBtn" class="w-full py-3.5 bg-gradient-to-r from-brand-lavender to-brand-pink text-white font-bold rounded-xl shadow-lg hover:opacity-90 transition-all text-sm">دخول التطبيق</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="appContainer" class="hidden flex-1 flex flex-col max-w-7xl w-full mx-auto pb-20 lg:pb-0">
+
+        <!-- TOP BAR / HEADER -->
+        <header class="sticky top-0 z-30 glass-panel border-b border-purple-100 dark:border-slate-800 px-4 py-3 flex items-center justify-between shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-lavender to-brand-pink flex items-center justify-center text-white shadow-md">
+                    <i data-lucide="globe" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight bg-gradient-to-r from-brand-lavender to-brand-pink bg-clip-text text-transparent">عالمي | WORLD</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400" id="headerClock">--:--:--</p>
+                </div>
+            </div>
+
+            <!-- Top Actions -->
+            <div class="flex items-center gap-2">
+                <button onclick="toggleTheme()" class="p-2.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors" title="تغيير المظهر">
+                    <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                    <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+                </button>
+                <button onclick="logoutUser()" class="p-2.5 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-600 hover:bg-rose-100 transition-colors" title="تسجيل الخروج">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                </button>
+                <button onclick="switchTab('settings')" class="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full bg-purple-50 dark:bg-slate-800 border border-purple-100 dark:border-slate-700">
+                    <div id="userAvatarHeader" class="w-7 h-7 rounded-full bg-brand-lavender text-white font-bold flex items-center justify-center text-xs">U</div>
+                    <span id="userNameHeader" class="text-xs font-semibold max-w-[90px] truncate">المستخدم</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN BODY SECTION -->
+        <main class="flex-1 p-4 md:p-6 lg:p-8 max-w-6xl mx-auto w-full">
+
+            <!-- 1. HOME TAB -->
+            <section id="tab-home" class="tab-content space-y-6">
+                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-brand-mauveDark via-brand-lavender to-brand-pink p-6 md:p-8 text-white shadow-xl">
+                    <div class="relative z-10 flex flex-col md:flex-row justify-between md:items-center gap-4">
+                        <div>
+                            <div class="inline-flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md mb-2">
+                                <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+                                <span id="currentFullDate">اليوم والتاريخ</span>
+                            </div>
+                            <h2 class="text-2xl md:text-3xl font-extrabold" id="greetingText">صباح الخير ✨</h2>
+                            <p class="text-white/80 text-sm mt-1">إليك نظرة عامة على يومك وإنجازاتك اليومية.</p>
+                        </div>
+                        <button onclick="openTaskModal()" class="px-5 py-2.5 bg-white text-brand-mauveDark font-bold rounded-2xl shadow hover:bg-slate-50 transition-all text-sm flex items-center gap-2">
+                            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                            <span>إضافة مهمة</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div onclick="switchTab('study')" class="cursor-pointer bg-white dark:bg-brand-cardDark p-4 rounded-2xl shadow-sm border border-purple-50 dark:border-slate-800 hover:shadow-md transition-all">
+                        <span class="text-xs font-bold text-slate-400">المهام القادمة</span>
+                        <p class="text-2xl font-black text-slate-800 dark:text-white mt-2" id="statPendingCount">0</p>
+                    </div>
+                    <div onclick="switchTab('achievements')" class="cursor-pointer bg-white dark:bg-brand-cardDark p-4 rounded-2xl shadow-sm border border-purple-50 dark:border-slate-800 hover:shadow-md transition-all">
+                        <span class="text-xs font-bold text-slate-400">نسبة الإنجاز</span>
+                        <p class="text-2xl font-black text-slate-800 dark:text-white mt-2" id="statCompletionRate">0%</p>
+                    </div>
+                    <div onclick="switchTab('space')" class="cursor-pointer bg-white dark:bg-brand-cardDark p-4 rounded-2xl shadow-sm border border-purple-50 dark:border-slate-800 hover:shadow-md transition-all">
+                        <span class="text-xs font-bold text-slate-400">اليوميات</span>
+                        <p class="text-2xl font-black text-slate-800 dark:text-white mt-2" id="statDiariesCount">0</p>
+                    </div>
+                    <div onclick="switchTab('food')" class="cursor-pointer bg-white dark:bg-brand-cardDark p-4 rounded-2xl shadow-sm border border-purple-50 dark:border-slate-800 hover:shadow-md transition-all">
+                        <span class="text-xs font-bold text-slate-400">نصيحة غذائية</span>
+                        <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mt-2 truncate">شرب الماء كافٍ يومياً</p>
+                    </div>
+                </div>
+
+                <!-- Content Layout -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-white dark:bg-brand-cardDark p-6 rounded-3xl shadow-sm border border-purple-50 dark:border-slate-800 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-bold text-base flex items-center gap-2"><i data-lucide="check-square" class="text-brand-lavender"></i> مهام اليوم القادمة</h3>
+                            <button onclick="switchTab('study')" class="text-xs font-bold text-brand-lavender hover:underline">عرض الكل</button>
+                        </div>
+                        <div id="homeTaskList" class="space-y-3"></div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-slate-800 dark:to-slate-800/80 p-6 rounded-3xl border border-purple-100 dark:border-slate-700 space-y-3">
+                            <span class="text-xs font-extrabold uppercase text-brand-lavender">آخر مذكراتي</span>
+                            <h4 id="homeDiaryTitle" class="font-bold text-sm truncate">لا يوجد مذكرات بعد</h4>
+                            <p id="homeDiarySnippet" class="text-xs text-slate-500 dark:text-slate-400 line-clamp-3">دون خواطرك ويومياتك في قسم مساحتي بكل خصوصية.</p>
+                            <button onclick="switchTab('space')" class="w-full py-2 bg-white dark:bg-slate-700 text-brand-mauveDark dark:text-white text-xs font-bold rounded-xl shadow-sm">كتابة مذكرة</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. STUDY TAB (خطوتي) -->
+            <section id="tab-study" class="tab-content hidden space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-black flex items-center gap-2"><i data-lucide="book-open" class="text-brand-lavender"></i> قسم خطوتي STUDY</h2>
+                        <p class="text-xs text-slate-400">تنظيم وتتبع الواجبات والاختبارات والمشاريع الدراسية.</p>
+                    </div>
+                    <button onclick="openTaskModal()" class="px-5 py-2.5 bg-brand-lavender text-white font-bold rounded-2xl shadow hover:opacity-90 transition-all text-xs flex items-center gap-2">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        <span>إضافة مهمة جديد</span>
+                    </button>
+                </div>
+
+                <!-- Search & Filters -->
+                <div class="bg-white dark:bg-brand-cardDark p-4 rounded-2xl border border-purple-50 dark:border-slate-800 flex flex-col sm:flex-row gap-3">
+                    <input type="text" id="taskSearch" oninput="renderTasks()" placeholder="بحث في المهام..." class="flex-1 px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none">
+                    <select id="taskFilterCategory" onchange="renderTasks()" class="px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold focus:outline-none">
+                        <option value="ALL">كل التصنيفات</option>
+                        <option value="واجب">واجب</option>
+                        <option value="اختبار">اختبار</option>
+                        <option value="مشروع">مشروع</option>
+                        <option value="مذاكرة">مذاكرة</option>
+                    </select>
+                </div>
+
+                <div id="studyTaskList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            </section>
+
+            <!-- 3. MY SPACE TAB (مساحتي) -->
+            <section id="tab-space" class="tab-content hidden space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-black flex items-center gap-2"><i data-lucide="heart" class="text-brand-pink"></i> مساحتي MY SPACE</h2>
+                        <p class="text-xs text-slate-400">مساحتك الآمنة لكتابة خواطرك ويومياتك الشخصية.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="togglePinLock()" class="px-4 py-2.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-2xl text-xs font-bold flex items-center gap-1">
+                            <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+                            <span id="pinLockBtnText">قفل المساحة</span>
+                        </button>
+                        <button onclick="openDiaryModal()" class="px-5 py-2.5 bg-brand-pink text-white font-bold rounded-2xl shadow hover:opacity-90 transition-all text-xs flex items-center gap-2">
+                            <i data-lucide="pen-tool" class="w-4 h-4"></i>
+                            <span>تدوين خاطرة</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PIN Lock Screen -->
+                <div id="pinLockOverlay" class="hidden bg-white dark:bg-brand-cardDark p-8 rounded-3xl shadow-xl text-center space-y-4 max-w-sm mx-auto border border-purple-100 dark:border-slate-700">
+                    <div class="w-16 h-16 bg-pink-100 dark:bg-pink-900/30 text-brand-pink rounded-full flex items-center justify-center mx-auto">
+                        <i data-lucide="lock" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="text-lg font-bold">المساحة محمية برمز PIN</h3>
+                    <input type="password" id="pinInput" maxlength="4" placeholder="••••" class="w-32 text-center text-2xl tracking-widest py-2 bg-slate-100 dark:bg-slate-800 border rounded-xl focus:outline-none">
+                    <div>
+                        <button onclick="verifyPin()" class="px-6 py-2 bg-brand-pink text-white font-bold rounded-xl text-xs">فتح القفل</button>
+                    </div>
+                </div>
+
+                <div id="spaceMainContent">
+                    <div id="diariesGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                </div>
+            </section>
+
+            <!-- 4. SMART FOOD TAB (غذائي الذكي) -->
+            <section id="tab-food" class="tab-content hidden space-y-6">
+                <div>
+                    <h2 class="text-2xl font-black flex items-center gap-2"><i data-lucide="apple" class="text-emerald-500"></i> غذائي الذكي SMART FOOD</h2>
+                    <p class="text-xs text-slate-400">دليل موثوق للقيم الغذائية والفوائد الصحية للأطعمة.</p>
+                </div>
+                <div id="foodGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </section>
+
+            <!-- 5. ACHIEVEMENTS TAB (إنجازاتي) -->
+            <section id="tab-achievements" class="tab-content hidden space-y-6">
+                <div>
+                    <h2 class="text-2xl font-black flex items-center gap-2"><i data-lucide="award" class="text-brand-pink"></i> إنجازاتي MY ACHIEVEMENTS</h2>
+                    <p class="text-xs text-slate-400">تتبع تقدمك الحقيقي وشارات التقدير التي اكتسبتها.</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-white dark:bg-brand-cardDark p-6 rounded-3xl text-center space-y-2 border">
+                        <p class="text-3xl font-black text-brand-lavender" id="achieveDoneCount">0</p>
+                        <p class="text-xs text-slate-400">المهام المنجزة</p>
+                    </div>
+                    <div class="bg-white dark:bg-brand-cardDark p-6 rounded-3xl text-center space-y-2 border">
+                        <p class="text-3xl font-black text-brand-pink" id="achieveDiaryCount">0</p>
+                        <p class="text-xs text-slate-400">اليوميات المكتوبة</p>
+                    </div>
+                    <div class="bg-white dark:bg-brand-cardDark p-6 rounded-3xl text-center space-y-2 border">
+                        <p class="text-3xl font-black text-emerald-500" id="achievePercentText">0%</p>
+                        <p class="text-xs text-slate-400">نسبة الالتزام العامة</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. LANGUAGES TAB -->
+            <section id="tab-languages" class="tab-content hidden space-y-6">
+                <div>
+                    <h2 class="text-2xl font-black flex items-center gap-2"><i data-lucide="globe" class="text-brand-lavender"></i> لغات العالم LANGUAGES</h2>
+                    <p class="text-xs text-slate-400">اختر لغة الواجهة التفاعلية.</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button onclick="setLanguage('ar')" class="p-4 bg-white dark:bg-brand-cardDark rounded-2xl border text-right font-bold text-sm hover:border-brand-lavender">العربية (Arabic) 🇸🇦</button>
+                    <button onclick="setLanguage('en')" class="p-4 bg-white dark:bg-brand-cardDark rounded-2xl border text-right font-bold text-sm hover:border-brand-lavender">English (الإنجليزية) 🇺🇸</button>
+                </div>
+            </section>
+
+            <!-- 7. SETTINGS TAB -->
+            <section id="tab-settings" class="tab-content hidden space-y-6">
+                <div>
+                    <h2 class="text-2xl font-black flex items-center gap-2"><i data-lucide="settings" class="text-slate-600"></i> الإعدادات</h2>
+                    <p class="text-xs text-slate-400">إدارة حسابك وبياناتك المحلية.</p>
+                </div>
+                <div class="bg-white dark:bg-brand-cardDark p-6 rounded-3xl border space-y-4">
+                    <button onclick="logoutUser()" class="w-full py-3 bg-rose-500 text-white rounded-xl text-xs font-bold">تسجيل الخروج من الحساب</button>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- NAVIGATION BAR -->
+        <nav class="fixed bottom-0 inset-x-0 z-40 glass-panel border-t border-purple-100 dark:border-slate-800 p-2">
+            <div class="max-w-md mx-auto flex items-center justify-around">
+                <button onclick="switchTab('home')" class="nav-btn active flex flex-col items-center gap-1 p-2 text-brand-lavender font-extrabold" data-tab="home"><i data-lucide="home" class="w-5 h-5"></i><span class="text-[10px]">الرئيسية</span></button>
+                <button onclick="switchTab('study')" class="nav-btn flex flex-col items-center gap-1 p-2 text-slate-400" data-tab="study"><i data-lucide="book-open" class="w-5 h-5"></i><span class="text-[10px]">خطوتي</span></button>
+                <button onclick="switchTab('space')" class="nav-btn flex flex-col items-center gap-1 p-2 text-slate-400" data-tab="space"><i data-lucide="heart" class="w-5 h-5"></i><span class="text-[10px]">مساحتي</span></button>
+                <button onclick="switchTab('food')" class="nav-btn flex flex-col items-center gap-1 p-2 text-slate-400" data-tab="food"><i data-lucide="apple" class="w-5 h-5"></i><span class="text-[10px]">غذائي</span></button>
+                <button onclick="switchTab('achievements')" class="nav-btn flex flex-col items-center gap-1 p-2 text-slate-400" data-tab="achievements"><i data-lucide="award" class="w-5 h-5"></i><span class="text-[10px]">إنجازاتي</span></button>
+                <button onclick="switchTab('settings')" class="nav-btn flex flex-col items-center gap-1 p-2 text-slate-400" data-tab="settings"><i data-lucide="settings" class="w-5 h-5"></i><span class="text-[10px]">الإعدادات</span></button>
+            </div>
+        </nav>
+    </div>
+
+    <!-- MODALS -->
+    <!-- Task Modal -->
+    <div id="taskModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-brand-cardDark w-full max-w-md rounded-3xl p-6 space-y-4 shadow-2xl border border-purple-100 dark:border-slate-700">
+            <h3 class="font-bold text-base">إضافة مهمة دراسية جديدة</h3>
+            <form onsubmit="handleTaskSubmit(event)" class="space-y-3">
+                <input type="text" id="taskTitleInput" required placeholder="عنوان المهمة *" class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs focus:outline-none">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="taskSubjectInput" placeholder="المادة الدراسية" class="px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs focus:outline-none">
+                    <select id="taskCategoryInput" class="px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs focus:outline-none">
+                        <option value="واجب">واجب</option>
+                        <option value="اختبار">اختبار</option>
+                        <option value="مشروع">مشروع</option>
+                        <option value="مذاكرة">مذاكرة</option>
+                    </select>
+                </div>
+                <input type="date" id="taskDueDateInput" required class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs focus:outline-none">
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('taskModal')" class="px-4 py-2 bg-slate-100 dark:bg-slate-700 rounded-xl text-xs font-bold">إلغاء</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-lavender text-white rounded-xl text-xs font-bold">حفظ المهمة</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Diary Modal -->
+    <div id="diaryModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-brand-cardDark w-full max-w-md rounded-3xl p-6 space-y-4 shadow-2xl border border-pink-100 dark:border-slate-700">
+            <h3 class="font-bold text-base">تدوين خاطرة جديدة</h3>
+            <form onsubmit="handleDiarySubmit(event)" class="space-y-3">
+                <input type="text" id="diaryTitleInput" required placeholder="عنوان الخاطرة *" class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs focus:outline-none">
+                <textarea id="diaryContentInput" rows="4" required placeholder="اكتب يومياتك هنا..." class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl text-xs focus:outline-none"></textarea>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('diaryModal')" class="px-4 py-2 bg-slate-100 dark:bg-slate-700 rounded-xl text-xs font-bold">إلغاء</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-pink text-white rounded-xl text-xs font-bold">حفظ الخاطرة</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- APP JAVASCRIPT LOGIC -->
+    <script>
+        const foodDatabase = [
+            { id: 1, name: "تفاح (Apple)", category: "فواكه", icon: "🍎", calories: 52, protein: 0.3, carbs: 13.8, benefits: "غني بالألياف ومضادات الأكسدة وتعزيز صحة الهضم." },
+            { id: 2, name: "موز (Banana)", category: "فواكه", icon: "🍌", calories: 89, protein: 1.1, carbs: 22.8, benefits: "يمد الجسم بالطاقة السريعة والبوتاسيوم." },
+            { id: 3, name: "بروكلي (Broccoli)", category: "خضروات", icon: "🥦", calories: 34, protein: 2.8, carbs: 6.6, benefits: "يقوي جهاز المناعة وغني بفيتامين K وC." },
+            { id: 4, name: "بيض (Eggs)", category: "بروتينات", icon: "🥚", calories: 155, protein: 13, carbs: 1.1, benefits: "مصدر كامل للبروتين والكولين لتعزيز صحة الدماغ." },
+            { id: 5, name: "صدر دجاج (Chicken Breast)", category: "بروتينات", icon: "🍗", calories: 165, protein: 31, carbs: 0, benefits: "بروتين صافي ممتاز لبناء العضلات والصحة العامة." },
+            { id: 6, name: "شوفان (Oats)", category: "حبوب", icon: "🌾", calories: 389, protein: 16.9, carbs: 66.3, benefits: "منخفض المؤشر الجلايسيمي ويحافظ على طاقة مستدامة." }
+        ];
+
+        let authMode = 'login';
+        let currentUser = null;
+        let appData = { tasks: [], diaries: [], pin: null };
+
+        window.onload = function() {
+            initClock();
+            const savedUser = localStorage.getItem("WORLD_CURRENT_USER");
+            if (savedUser) {
+                currentUser = savedUser;
+                loadUserData();
+                showApp();
+            }
+            lucide.createIcons();
+        };
+
+        function initClock() {
+            function update() {
+                const now = new Date();
+                const clock = document.getElementById("headerClock");
+                const date = document.getElementById("currentFullDate");
+                if (clock) clock.innerText = now.toLocaleTimeString('ar-SA');
+                if (date) date.innerText = now.toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            }
+            update();
+            setInterval(update, 1000);
+        }
+
+        function switchAuthMode(mode) {
+            authMode = mode;
+            const nameField = document.getElementById("nameFieldContainer");
+            const loginBtn = document.getElementById("loginTabBtn");
+            const regBtn = document.getElementById("regTabBtn");
+            const submitBtn = document.getElementById("authSubmitBtn");
+
+            if (mode === 'register') {
+                nameField.classList.remove("hidden");
+                loginBtn.classList.replace("bg-white", "text-slate-500");
+                loginBtn.classList.remove("shadow-sm");
+                regBtn.classList.replace("text-slate-500", "bg-white");
+                regBtn.classList.add("shadow-sm", "dark:bg-slate-700");
+                submitBtn.innerText = "إنشاء الحساب";
+            } else {
+                nameField.classList.add("hidden");
+                regBtn.classList.replace("bg-white", "text-slate-500");
+                regBtn.classList.remove("shadow-sm");
+                loginBtn.classList.replace("text-slate-500", "bg-white");
+                loginBtn.classList.add("shadow-sm", "dark:bg-slate-700");
+                submitBtn.innerText = "دخول التطبيق";
+            }
+        }
+
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById("authEmail").value.trim();
+            const nameInput = document.getElementById("authName").value.trim();
+
+            if (authMode === 'register') {
+                currentUser = nameInput || email;
+                localStorage.setItem("WORLD_USER_" + currentUser, JSON.stringify({ tasks: [], diaries: [], pin: null }));
+            } else {
+                currentUser = email;
+            }
+
+            localStorage.setItem("WORLD_CURRENT_USER", currentUser);
+            loadUserData();
+            showApp();
+        }
+
+        function logoutUser() {
+            localStorage.removeItem("WORLD_CURRENT_USER");
+            currentUser = null;
+            document.getElementById("appContainer").classList.add("hidden");
+            document.getElementById("authScreen").classList.remove("hidden");
+        }
+
+        function showApp() {
+            document.getElementById("authScreen").classList.add("hidden");
+            document.getElementById("appContainer").classList.remove("hidden");
+            document.getElementById("userNameHeader").innerText = currentUser;
+            document.getElementById("userAvatarHeader").innerText = currentUser.charAt(0).toUpperCase();
+            renderAll();
+        }
+
+        function loadUserData() {
+            const data = localStorage.getItem("WORLD_USER_" + currentUser);
+            if (data) {
+                try {
+                    appData = JSON.parse(data);
+                } catch(e) {
+                    appData = { tasks: [], diaries: [], pin: null };
+                }
+            } else {
+                appData = { tasks: [], diaries: [], pin: null };
+            }
+        }
+
+        function saveUserData() {
+            localStorage.setItem("WORLD_USER_" + currentUser, JSON.stringify(appData));
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
+            const target = document.getElementById("tab-" + tabId);
+            if (target) target.classList.remove("hidden");
+
+            document.querySelectorAll(".nav-btn").forEach(b => {
+                b.classList.remove("text-brand-lavender", "font-extrabold");
+                if (b.getAttribute("data-tab") === tabId) {
+                    b.classList.add("text-brand-lavender", "font-extrabold");
+                }
+            });
+        }
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+        }
+
+        // Tasks Handlers
+        function openTaskModal() { document.getElementById("taskModal").classList.remove("hidden"); }
+        function closeModal(id) { document.getElementById(id).classList.add("hidden"); }
+
+        function handleTaskSubmit(e) {
+            e.preventDefault();
+            const title = document.getElementById("taskTitleInput").value.trim();
+            const subject = document.getElementById("taskSubjectInput").value.trim();
+            const category = document.getElementById("taskCategoryInput").value;
+            const dueDate = document.getElementById("taskDueDateInput").value;
+
+            appData.tasks.push({
+                id: Date.now().toString(),
+                title, subject, category, dueDate, completed: false
+            });
+
+            saveUserData();
+            renderAll();
+            closeModal("taskModal");
+            document.getElementById("taskTitleInput").value = "";
+        }
+
+        function toggleTaskStatus(id) {
+            const task = appData.tasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                saveUserData();
+                renderAll();
+            }
+        }
+
+        function deleteTask(id) {
+            if (confirm("هل تريد حذف هذه المهمة؟")) {
+                appData.tasks = appData.tasks.filter(t => t.id !== id);
+                saveUserData();
+                renderAll();
+            }
+        }
+
+        // Diary Handlers
+        function openDiaryModal() { document.getElementById("diaryModal").classList.remove("hidden"); }
+
+        function handleDiarySubmit(e) {
+            e.preventDefault();
+            const title = document.getElementById("diaryTitleInput").value.trim();
+            const content = document.getElementById("diaryContentInput").value.trim();
+
+            appData.diaries.unshift({
+                id: Date.now().toString(),
+                title, content, date: new Date().toLocaleDateString('ar-SA')
+            });
+
+            saveUserData();
+            renderAll();
+            closeModal("diaryModal");
+            document.getElementById("diaryTitleInput").value = "";
+            document.getElementById("diaryContentInput").value = "";
+        }
+
+        function deleteDiary(id) {
+            if (confirm("هل تريد حذف هذه الخاطرة؟")) {
+                appData.diaries = appData.diaries.filter(d => d.id !== id);
+                saveUserData();
+                renderAll();
+            }
+        }
+
+        function togglePinLock() {
+            if (appData.pin) {
+                if (confirm("هل تريد إلغاء قفل المساحة؟")) {
+                    appData.pin = null;
+                    saveUserData();
+                    document.getElementById("pinLockOverlay").classList.add("hidden");
+                    document.getElementById("spaceMainContent").classList.remove("hidden");
+                    document.getElementById("pinLockBtnText").innerText = "قفل المساحة";
+                }
+            } else {
+                const pin = prompt("أدخل رمز PIN جديد من 4 أرقام:");
+                if (pin && pin.length === 4) {
+                    appData.pin = pin;
+                    saveUserData();
+                    document.getElementById("pinLockBtnText").innerText = "إلغاء القفل";
+                    alert("تم تفعيل القفل بنجاح.");
+                }
+            }
+        }
+
+        function verifyPin() {
+            const input = document.getElementById("pinInput").value;
+            if (input === appData.pin) {
+                document.getElementById("pinLockOverlay").classList.add("hidden");
+                document.getElementById("spaceMainContent").classList.remove("hidden");
+            } else {
+                alert("رمز PIN خاطئ.");
+            }
+        }
+
+        function setLanguage(lang) {
+            if (lang === 'en') {
+                document.documentElement.dir = 'ltr';
+                alert("Switched to English interface mode!");
+            } else {
+                document.documentElement.dir = 'rtl';
+                alert("تم التحويل للغة العربية!");
+            }
+        }
+
+        // Render Functions
+        function renderTasks() {
+            const list = document.getElementById("studyTaskList");
+            const homeList = document.getElementById("homeTaskList");
+            const searchVal = (document.getElementById("taskSearch")?.value || "").toLowerCase();
+            const catVal = document.getElementById("taskFilterCategory")?.value || "ALL";
+
+            const filtered = appData.tasks.filter(t => {
+                const mSearch = t.title.toLowerCase().includes(searchVal);
+                const mCat = catVal === 'ALL' || t.category === catVal;
+                return mSearch && mCat;
+            });
+
+            list.innerHTML = filtered.length === 0 ? `<p class="text-xs text-slate-400 py-4 text-center">لا توجد مهام دراسية.</p>` : '';
+            filtered.forEach(t => {
+                list.innerHTML += `
+                    <div class="p-4 bg-white dark:bg-brand-cardDark rounded-2xl border flex items-center justify-between shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <button onclick="toggleTaskStatus('${t.id}')" class="w-5 h-5 rounded-md border flex items-center justify-center ${t.completed ? 'bg-brand-lavender border-brand-lavender text-white' : 'border-slate-300'}">
+                                ${t.completed ? '✓' : ''}
+                            </button>
+                            <div>
+                                <h4 class="font-bold text-xs ${t.completed ? 'line-through text-slate-400' : ''}">${t.title}</h4>
+                                <p class="text-[10px] text-slate-400">${t.subject || 'عام'} • ${t.dueDate}</p>
+                            </div>
+                        </div>
+                        <button onclick="deleteTask('${t.id}')" class="text-rose-500 text-xs hover:underline">حذف</button>
+                    </div>
+                `;
+            });
+
+            // Home Tasks Widget
+            const pending = appData.tasks.filter(t => !t.completed);
+            homeList.innerHTML = pending.length === 0 ? `<p class="text-xs text-slate-400 py-2">لا توجد مهام معلقة لليوم!</p>` : '';
+            pending.slice(0, 3).forEach(t => {
+                homeList.innerHTML += `
+                    <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-between text-xs">
+                        <span class="font-bold">${t.title}</span>
+                        <span class="text-[10px] text-slate-400">${t.dueDate}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function renderDiaries() {
+            const grid = document.getElementById("diariesGrid");
+            grid.innerHTML = appData.diaries.length === 0 ? `<p class="text-xs text-slate-400 py-4 text-center">لا يوجد خواطر مدونة بعد.</p>` : '';
+            appData.diaries.forEach(d => {
+                grid.innerHTML += `
+                    <div class="p-5 bg-white dark:bg-brand-cardDark rounded-3xl border shadow-sm space-y-2">
+                        <div class="flex justify-between items-center">
+                            <h4 class="font-bold text-sm text-brand-pink">${d.title}</h4>
+                            <span class="text-[10px] text-slate-400">${d.date}</span>
+                        </div>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 whitespace-pre-line">${d.content}</p>
+                        <div class="flex justify-end pt-2">
+                            <button onclick="deleteDiary('${d.id}')" class="text-rose-500 text-xs">حذف</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (appData.diaries.length > 0) {
+                document.getElementById("homeDiaryTitle").innerText = appData.diaries[0].title;
+                document.getElementById("homeDiarySnippet").innerText = appData.diaries[0].content;
+            }
+        }
+
+        function renderFood() {
+            const grid = document.getElementById("foodGrid");
+            grid.innerHTML = "";
+            foodDatabase.forEach(f => {
+                grid.innerHTML += `
+                    <div class="p-4 bg-white dark:bg-brand-cardDark rounded-3xl border shadow-sm space-y-2">
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl">${f.icon}</span>
+                            <div>
+                                <h4 class="font-bold text-xs">${f.name}</h4>
+                                <span class="text-[10px] text-emerald-600 font-bold">${f.category}</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500">${f.benefits}</p>
+                        <div class="text-[10px] text-slate-400 pt-1">سعرات: ${f.calories} | بروتين: ${f.protein}g</div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderAll() {
+            renderTasks();
+            renderDiaries();
+            renderFood();
+
+            // Render Overview Counts
+            const totalTasks = appData.tasks.length;
+            const completedTasks = appData.tasks.filter(t => t.completed).length;
+            const pendingTasks = appData.tasks.filter(t => !t.completed).length;
+            const rate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+            document.getElementById("statPendingCount").innerText = pendingTasks;
+            document.getElementById("statDiariesCount").innerText = appData.diaries.length;
+            document.getElementById("statCompletionRate").innerText = rate + "%";
+
+            document.getElementById("achieveDoneCount").innerText = completedTasks;
+            document.getElementById("achieveDiaryCount").innerText = appData.diaries.length;
+            document.getElementById("achievePercentText").innerText = rate + "%";
+
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>
